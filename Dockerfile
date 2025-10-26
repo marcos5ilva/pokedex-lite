@@ -1,5 +1,5 @@
 # Use multi-stage build for smaller final image
-FROM eclipse-temurin:17-jdk-jammy as builder
+FROM eclipse-temurin:17-jdk-jammy AS builder
 WORKDIR /app
 COPY . .
 RUN ./mvnw clean package -DskipTests
