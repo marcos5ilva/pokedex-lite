@@ -1,6 +1,6 @@
 # Use a small JDK image
 # Use official OpenJDK image
-FROM eclipse-temurin:21-jdk-jammy
+FROM eclipse-temurin:17-alpine
 
 # Set working directory
 WORKDIR /app
