@@ -1,16 +1,14 @@
-# eb-docker/Dockerfile
-FROM amazoncorretto:17-alpine
+# ---- Build (Java 17) ----
+FROM maven:3.9-eclipse-temurin-17 AS build
+WORKDIR /src
+COPY pom.xml .
+RUN mvn -q -DskipTests dependency:go-offline
+COPY src ./src
+RUN mvn -q -DskipTests clean package
 
-# (good practice) run as non-root
-RUN addgroup -S app && adduser -S app -G app
+# ---- Runtime (Java 17) ----
+FROM eclipse-temurin:17-jre
 WORKDIR /app
-
-# copy your fat jar built by Maven
-COPY app.jar /app/app.jar
-
-# Spring Boot default is 8080
+COPY --from=build /src/target/*-SNAPSHOT.jar /app/app.jar
 EXPOSE 8080
-
-USER app
-# helpful JVM-in-container flags
-ENTRYPOINT ["java","-XX:+UseContainerSupport","-XX:MaxRAMPercentage=75","-jar","/app/app.jar"]
+ENTRYPOINT ["java","-jar","/app/app.jar"]
