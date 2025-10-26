@@ -1,16 +1,24 @@
-# Use a small JDK image
-# Use official OpenJDK image
-FROM eclipse-temurin:17-alpine
+# Use multi-stage build for smaller final image
+FROM eclipse-temurin:17-jdk-jammy as builder
+WORKDIR /app
+COPY . .
+RUN ./mvnw clean package -DskipTests
 
-# Set working directory
+# Final stage
+FROM eclipse-temurin:17-jre-jammy
+
+# Add non-root user for security
+RUN groupadd -r spring && useradd -r -g spring spring
+USER spring
+
 WORKDIR /app
 
-# Copy the built JAR into the image
-COPY target/pokedex-lite-0.0.1-SNAPSHOT.jar app.jar
+# Copy JAR from builder stage
+COPY --from=builder /app/target/pokedex-lite-0.0.1-SNAPSHOT.jar app.jar
 
-# Expose the port your app runs on (8080 is EB default)
-EXPOSE 8080
+# Expose port (Elastic Beanstalk uses 5000 by default)
+EXPOSE 5000
 
-# Run the JAR
-ENTRYPOINT ["java","-jar","app.jar"]
+# Add JVM options for better performance
+ENTRYPOINT ["java", "-jar", "-Dserver.port=5000", "app.jar"]
 
