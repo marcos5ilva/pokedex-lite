@@ -68,7 +68,7 @@ jobs:
       - name: Create EB application version
         run: |
           aws elasticbeanstalk create-application-version \
-            --application-name "${EB_APP}" \
+            --application-name "${{ secrets.EB_APPLICATION_NAME }}" \
             --version-label "${VERSION}" \
             --source-bundle S3Bucket=${EB_BUCKET},S3Key=${REPO}/${VERSION}.zip
 
